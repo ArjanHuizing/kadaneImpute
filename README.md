@@ -4,13 +4,14 @@ Based on the 2001 paper 'Statistical matching: A paradigm for assesing the uncer
 The procedure can be run inside the R package `mice`, and should be specified for a block of atleast 2 continous variables with missings.
 
 # Example R code
+```
 data <- MASS::mvrnorm(n = 100, mu = c(0, 1), Sigma = matrix(c(1, 0.8, 0.8, 1), ncol = 2))
 data[1:50, 1] <- NA
 data[51:100, 2] <- NA
 
 imp <- mice(as.data.frame(data), method = "kadane", blocks = list(c("V1", "V2")), kadane.corr = 0.8, kadane.match = TRUE)
 plot(complete(imp))
-
+```
 
 # To-do
 - Use maximum likelihood to estimate the covariance matrix to prevent serious errors when estimating more complex data.
