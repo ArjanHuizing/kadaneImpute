@@ -14,7 +14,7 @@ plot(complete(imp))
 ```
 
 # To-do
-- ~~Use maximum likelihood to estimate the covariance matrix to prevent serious errors when estimating more complex data.
+- ~~Use maximum likelihood to estimate the covariance matrix to prevent serious errors when estimating more complex data.~~
 - Use robust residual variance estimation
 - More options for correlation specification
 - Make code more efficient
