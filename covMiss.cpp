@@ -65,15 +65,3 @@ mat covMiss(mat x, int its = 100) {
   // return
   return sigma;
 }
-
-// test
-/*** R
-set.seed(31598)
-testdat <- MASS::mvrnorm(100, mu = c(1, 0, 5), Sigma = matrix(c(1, 0, 0, 
-                                                             0, 1, 0,
-                                                             0, 0, 1), ncol = 3))
-testdat[1:50, 1] <- NA
-testdat[51:100, 2] <- NA
-# let it RIP
-covMiss(testdat)
-*/

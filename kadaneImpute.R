@@ -3,8 +3,9 @@
   # This is an imputation method for the package `mice` that allows a user to set 
   # a correlation between two or more outcomes which have no overlap.
 
-# Packages
+# necessary libraries
 library(mice)
+library(Rcpp)
 library(matrixcalc)
 
 # impute.kadane function
@@ -12,6 +13,9 @@ mice.impute.kadane <- function(data, format = "imputes", kadane.corr = 0, ...){
   kad <- kadaneImpute(data, kadane.corr = kadane.corr, ...)
   return(mice:::single2imputes(kad, is.na(data)))
 }
+
+# covMiss function
+sourceCpp(file = "covMiss.cpp")
 
 # Kadane imputation function
 kadaneImpute <- function(data, kadane.corr, kadane.match = TRUE, donors = 5L, ...){
@@ -25,7 +29,7 @@ kadaneImpute <- function(data, kadane.corr, kadane.match = TRUE, donors = 5L, ..
     stop("Number of correlations `kadane.corr` needs to be equal to 1 or the number of outcomes 
          with missing values specified in the impute.kadane block")
   }
-  covars <- cov(data, use = "pairwise.complete.obs")
+  covars <- covMiss(as.matrix(data))
   # fill in missing covars with used-specified correlation
   covarmiss <- combn(diag(covars)[miss], 2, FUN = function(x){(x[1]*x[2])^(1/2)*kadane.corr})
   fill <- combn(miss, 2)
