@@ -60,7 +60,7 @@ mat covMiss(mat x, int its = 100) {
       col = x_imp.col(k);
       means[k] = mean(col);
     }
-    sigma = (cov(x_imp) * (nrow-1)/nrow) + + (bias/nrow);
+    sigma = (cov(x_imp) * (nrow-1)/nrow) + (bias/nrow);
   }
   // return
   return sigma;
