@@ -7,12 +7,16 @@ using namespace arma;
 // maximum likelihood estimation. Values are obtained through a
 // Expectation-Maximization algorithm.
 
+// x = matrix with data
+// its = maximum number of iterations used
+// crit = differenence between iterations at which to stop early.
+
 // [[Rcpp::export]]
-mat covMiss(mat x, int its = 100) {
+mat covMiss(mat x, int its = 100, double crit = 0.0001) {
   int n = x.n_rows;
   double nrow = x.n_rows;
   int m = x.n_cols;
-  int i, j, k;
+  int i, j, k, count;
   vec means(m);
   vec col(n);
   vec row(m);
@@ -35,6 +39,7 @@ mat covMiss(mat x, int its = 100) {
   }
   // starting values
   mat sigma = cov(x_imp) * (nrow-1)/nrow;
+  mat old_sigma = cov(x_imp) * (nrow-1)/nrow;
   mat bias(m, m);  
   
   // EM algorithm
@@ -46,7 +51,7 @@ mat covMiss(mat x, int its = 100) {
       miss = find_nonfinite(row);
       avail = find_finite(row);
       if(m > avail.n_elem){
-        bias(miss, miss) = bias(miss, miss) + sigma(miss, miss); - 
+        bias(miss, miss) = bias(miss, miss) + sigma(miss, miss) - 
           sigma(miss, avail) * inv_sympd(sigma(avail, avail)) * sigma(avail, miss);
         
         row_imp(miss) = means(miss) + (sigma(miss, avail) * 
@@ -61,6 +66,12 @@ mat covMiss(mat x, int its = 100) {
       means[k] = mean(col);
     }
     sigma = (cov(x_imp) * (nrow-1)/nrow) + (bias/nrow);
+    if(max(max(abs(sigma - old_sigma))) <= crit){
+      count = j;
+      break;
+    } else {
+      old_sigma = sigma;
+    }
   }
   // return
   return sigma;
