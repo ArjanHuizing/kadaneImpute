@@ -3,10 +3,16 @@
 // [[Rcpp::depends("RcppArmadillo")]]
 using namespace arma;
 
-// This is a simple example of exporting a C++ function to R. You can
+// The RIEPS algorithm (Rassler, 2002) creates a second set of predictions, predicting observed
+// values using imputed ones. These are then used to estimate the residual
+// variance.
+
+// The initial estimate is biased, and underestimates the amount of variance.
+// This behaviour is adressed by iterating the second set of predictions with
+// updated residual variances (Kiesl & Rassler, 2009).
 
 // [[Rcpp::export]]
-vec RIEPS(mat x, mat sigma, int its = 1, double crit = 0.01) {
+mat RIEPS(mat x, mat sigma, int its = 100, double crit = 0.005) {
   int n = x.n_rows;
   double nrow = x.n_rows;
   int m = x.n_cols;
@@ -40,55 +46,49 @@ vec RIEPS(mat x, mat sigma, int its = 1, double crit = 0.01) {
       nmiss(miss) += 1;
     }
   }
-  // start interating
+  
+  // start iterating
   vec resids = zeros<vec>(m);
   vec old_resids = zeros<vec>(m);
+  mat x_s = x_imp;
   for(j = 0; j < its; j++){
     // predict obs
     resids = zeros<vec>(m); // reset resids
     for(i = 0; i < m; i++){ // recalc means
-      col = x_imp.col(i);
+      col = x_s.col(i);
       means[i] = mean(col);
     }
-    sigma = cov(x_imp); // recalc sigma
+    sigma = cov(x_s); // recalc sigma
                
     for(i = 0; i < n; i++){
       row = conv_to< vec >::from(x.row(i));
-      row_imp = conv_to< vec >::from(x_imp.row(i));
+      row_imp = conv_to< vec >::from(x_s.row(i));
       miss = find_nonfinite(row);
       avail = find_finite(row);
       if(m > miss.n_elem){
         row_imp(avail) = means(avail) + (sigma(avail, miss) * 
           inv_sympd(sigma(miss, miss))) * (row_imp(miss) - means(miss));
-        resids(avail) += pow(row(avail) - row_imp(avail).t(), 2) / (nmiss(avail) - 1);  
+        
+        resids(avail) += pow((row(avail) - row_imp(avail)), 2) / (nmiss(avail) - 1);  
       }
     }
     // compare
-    if((max(resids - old_resids)) > crit){
-      if(j < (its-1)){old_resids = resids;}
-      
+    if((max(resids/old_resids)) > (1 + crit)){
+      old_resids = resids;
+      // add resids
       for(i = 0; i < n; i++){
         row = conv_to< vec >::from(x.row(i));
         row_imp = conv_to< vec >::from(x_imp.row(i));
         miss = find_nonfinite(row);
         if(m > miss.n_elem){
-          row_imp(miss) += (randn<vec>(miss.n_elem) * resids(miss));
-          x_imp.row(i) = row_imp.t();
+          row_imp(miss) += (resids(miss) % randn<vec>(miss.n_elem));
+          x_s.row(i) = row_imp.t();
         }
       }
     } else {
       break;
     }
   }
-
   // return
-  return resids;
+  return x_s;
 }
-
-
-/*** R
-set.seed(3519)
-RIEPS(data, sigma, its = 10)
-
-*/
-

@@ -17,6 +17,9 @@ mice.impute.kadane <- function(data, format = "imputes", kadane.corr = 0, ...){
 # covMiss function
 sourceCpp(file = "covMiss.cpp")
 
+# RIEPS function
+sourceCpp(file = "RIEPS.cpp")
+
 # Kadane imputation function
 kadaneImpute <- function(data, kadane.corr, kadane.match = TRUE, donors = 5L, ...){
   # find variables that need to be imputed
@@ -42,38 +45,8 @@ kadaneImpute <- function(data, kadane.corr, kadane.match = TRUE, donors = 5L, ..
   if(!matrixcalc::is.positive.definite(covars)){
     warning("Covariance matrix not positive-definite.")
   }
-  
-  # regression step (moriarity & scheuren 2001, pg 411)
-  predicted <- matrix(NA, nrow = nrow(data), ncol = length(miss))
-  for(i in 1:length(miss)){
-    for(j in 1:nrow(data)){
-      miss.j <- which(colMeans(is.na(data[j, , drop = FALSE])) == 1)
-      # all outcomes i predicted for participant j, using participant j's
-      # observed outcome + covariates.
-      predicted[j, i] <- mean(data[, miss[i]], na.rm = TRUE) +
-        (covars[miss[i], -miss.j]) %*% solve(covars[-miss.j, -miss.j]) %*% 
-      t(data[j, -miss.j] - colMeans(data[, -miss.j, drop = FALSE], na.rm = TRUE))
-    }
-  }
-  
-  # Residual variance (moriarity & scheuren 2001, pg 413)
-  resids <- numeric(0)
-  for(i in 1:length(miss)){
-    resids[i] <- covars[miss[i], miss[i]] - 
-      (covars[miss[i], -miss[i]]) %*% solve(covars[-miss[i], -miss[i]]) %*%
-      t(t(covars[miss[i], -miss[i]]))
-  }
-  if(min(resids) < 0){
-    warning("negative variance detected in: ", 
-            paste(names(miss[which(resids < 0)]), collapse = ", "))
-  }
-  
-  # Add residual variance to predicted values, replace predicted with observed.
-  imputed <- data
-  for(i in 1:length(miss)){
-    imputed[is.na(imputed[, miss[i]]), miss[i]] <- predicted[is.na(imputed[, miss[i]]), i] + 
-      c(rnorm(n = nrow(predicted[is.na(imputed[, miss[i]]),]), 0, resids[i]))
-  }
+  # regression step (moriarity & scheuren 2001, 2010)
+  imputed <- RIEPS(as.matrix(data), covars)
   
   # Match with predictive mean matching
   if(kadane.match){
