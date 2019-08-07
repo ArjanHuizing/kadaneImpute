@@ -16,7 +16,7 @@ mat covMiss(mat x, int its = 100, double crit = 0.0001) {
   int n = x.n_rows;
   double nrow = x.n_rows;
   int m = x.n_cols;
-  int i, j, k, count;
+  int i, j, k;
   vec means(m);
   vec col(n);
   vec row(m);
@@ -39,9 +39,8 @@ mat covMiss(mat x, int its = 100, double crit = 0.0001) {
   }
   // starting values
   mat sigma = cov(x_imp) * (nrow-1)/nrow;
-  mat old_sigma = cov(x_imp) * (nrow-1)/nrow;
+  mat old_sigma = sigma;
   mat bias(m, m);  
-  
   // EM algorithm
   for(j = 0; j < its; j++){
     bias = zeros<mat>(m, m);
@@ -59,7 +58,6 @@ mat covMiss(mat x, int its = 100, double crit = 0.0001) {
         x_imp.row(i) = row_imp.t();  
       }
     }
-    
     // update
     for(k = 0; k < m; k++){
       col = x_imp.col(k);
@@ -67,7 +65,6 @@ mat covMiss(mat x, int its = 100, double crit = 0.0001) {
     }
     sigma = (cov(x_imp) * (nrow-1)/nrow) + (bias/nrow);
     if(max(max(abs(sigma - old_sigma))) <= crit){
-      count = j;
       break;
     } else {
       old_sigma = sigma;
