@@ -81,7 +81,7 @@ mat RIEPS(mat x, mat sigma, int its = 100, double crit = 0.005) {
         row_imp = conv_to< vec >::from(x_imp.row(i));
         miss = find_nonfinite(row);
         if(m > miss.n_elem){
-          row_imp(miss) += (resids(miss) % randn<vec>(miss.n_elem));
+          row_imp(miss) += (sqrt(resids(miss)) % randn<vec>(miss.n_elem));
           x_s.row(i) = row_imp.t();
         }
       }
