@@ -9,7 +9,10 @@ data <- MASS::mvrnorm(n = 100, mu = c(0, 1), Sigma = matrix(c(1, 0.8, 0.8, 1), n
 data[1:50, 1] <- NA
 data[51:100, 2] <- NA
 
-imp <- mice(as.data.frame(data), method = "kadane", blocks = list(c("V1", "V2")), kadane.corr = 0.8, kadane.match = TRUE)
+imp <- mice(as.data.frame(data), blocks = list(c("V1", "V2")), 
+                                 method = "kadane",
+                                 kadane.corr = 0.8, 
+                                 kadane.match = TRUE)
 plot(complete(imp))
 ```
 
