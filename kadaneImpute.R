@@ -53,10 +53,6 @@ kadaneImpute <- function(data, kadane.corr, kadane.match = TRUE, donors = 5L, ..
   if(kadane.match){
     sets <- combn(miss, 2) 
    for(i in 1:ncol(sets)){
-     #mahal <- mahalanobis(imputed[sets[, i]], 
-      #                    center = colMeans(imputed[sets[, i]]), 
-       #                   cov = covars[sets[, i],sets[, i]])
-
      set1 <- which(!is.na(data[, sets[1, i]]))
      set2 <- which(!is.na(data[, sets[2, i]]))
      match1 <- mice:::matcher(obs = data[set1, sets[1, i]], 
@@ -70,6 +66,7 @@ kadaneImpute <- function(data, kadane.corr, kadane.match = TRUE, donors = 5L, ..
     return(data)
    } # end sets of outcomes loop
   } else{
-    return(imputed)
+    data[is.na(data)] <- imputed[is.na(data)]
+    return(data)
   }# end matching conditional
 } # end function
