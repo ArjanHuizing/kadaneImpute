@@ -54,9 +54,9 @@ library(ggplot2)
 library(cowplot)
 
 plotIt <- ggplot(res, aes(x = set.r, colour = match)) + theme_minimal()
-plot_grid(plotIt + geom_line(aes(y = r)),
+plot_grid(plotIt + geom_line(aes(y = r)) + labs(y = "imputed correlation"),
           plotIt + geom_line(aes(y = bias)),
-          plotIt + geom_line(aes(y = ci)) + labs(y = c(0.9, 1)) + 
+          plotIt + geom_line(aes(y = ci)) + lims(y = c(0.9, 1)) + labs(y = "coverage rate") 
             geom_hline(yintercept = 0.95, linetype = 2),
-          plotIt + geom_line(aes(y = width)),
+          plotIt + geom_line(aes(y = width)) + labs(y = "average width"),
           nrow = 2)
