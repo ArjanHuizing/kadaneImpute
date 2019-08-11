@@ -7,6 +7,7 @@
 library(mice)
 library(Rcpp)
 library(matrixcalc)
+library(RcppArmadillo)
 
 # impute.kadane function
 mice.impute.kadane <- function(data, format = "imputes", kadane.corr = 0, ...){

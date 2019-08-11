@@ -21,7 +21,7 @@ mat RIEPS(mat x, mat sigma, int its = 100, double crit = 0.005) {
   vec row(m);
   vec row_imp(m);
   vec means(m);
-  vec nmiss(m);
+  vec nmiss = zeros<vec>(m);
   uvec avail(n);
   uvec miss(n);
   mat x_imp = x;
@@ -48,7 +48,7 @@ mat RIEPS(mat x, mat sigma, int its = 100, double crit = 0.005) {
   }
   
   // start iterating
-  vec resids = zeros<vec>(m);
+  vec resids(m);
   vec old_resids = zeros<vec>(m);
   mat x_s = x_imp;
   for(j = 0; j < its; j++){
@@ -81,7 +81,7 @@ mat RIEPS(mat x, mat sigma, int its = 100, double crit = 0.005) {
         row_imp = conv_to< vec >::from(x_imp.row(i));
         miss = find_nonfinite(row);
         if(m > miss.n_elem){
-          row_imp(miss) += (sqrt(resids(miss)) % randn<vec>(miss.n_elem));
+          row_imp(miss) += sqrt(resids(miss)) * randn<vec>(miss.n_elem);
           x_s.row(i) = row_imp.t();
         }
       }
