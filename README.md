@@ -26,5 +26,5 @@ plot(complete(imp))
 # Changelog
 - Two major bugs were squashed. The kadane method now works within mice. Proof-of-concept simulation results can be found in the Simulation folder.
 - The method described by Moriarity & Scheuren (2001) to estimate the residual variance can lead to negative variance estimates. The RIEPS algorithm is used instead (Kiesl & Rassler, 2009).
-- C++ based functions have sped up kadaneImpute significantly. A simple benchmark showed a 6x increased speed.
+- C++ based functions have sped up kadaneImpute significantly. A simple benchmark showed a ~~6x increased speed~~ **29x increased speed.**
 - Now estimates covariance matrix with expectation-maximization to obtain maximum likelihood estimates when data is missing.
