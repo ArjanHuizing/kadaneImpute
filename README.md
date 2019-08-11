@@ -16,10 +16,12 @@ plot(complete(imp))
 # To-do
 - ~~Use maximum likelihood to estimate the covariance matrix to prevent serious errors when estimating more complex data.~~
 - ~~Use robust residual variance estimation~~ (More testing required)
-- More options for correlation specification
 - ~~Make code more efficient~~
+- More options for correlation specification
+- Clean up and document
 
 # Changelog
+- Two major bugs were squashed. The kadane method now works within mice. Proof-of-concept simulation results can be found in the Simulation folder.
 - The method described by Moriarity & Scheuren (2001) to estimate the residual variance can lead to negative variance estimates. The RIEPS algorithm is used instead (Kiesl & Rassler, 2009).
 - C++ based functions have sped up kadaneImpute significantly. A simple benchmark showed a 6x increased speed.
 - Now estimates covariance matrix with expectation-maximization to obtain maximum likelihood estimates when data is missing.
